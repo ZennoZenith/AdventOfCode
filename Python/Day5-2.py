@@ -1,10 +1,12 @@
 def Move(stacks, fromIndex, toIndex, times):
+    temp = []
     for i in range(0, times):
         try:
-            temp = stacks[fromIndex - 1].pop()
-            stacks[toIndex - 1].append(temp)
+            temp.append(stacks[fromIndex - 1].pop())
         except IndexError:
             print("Underflow")
+    for i in range(0, times):
+        stacks[toIndex - 1].append(temp.pop())
 
 
 def main():
