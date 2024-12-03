@@ -1,18 +1,49 @@
-fn check_diff_vec(diff_vec: &[i32], ascending: bool) -> bool {
-    let mut is_valid = true;
-    match ascending {
-        true => diff_vec.iter().for_each(|v| {
-            if !(1..=3).contains(v) {
-                is_valid = false;
-            }
-        }),
-        false => diff_vec.iter().for_each(|v| {
-            if !(1..=3).contains(&-v) {
-                is_valid = false;
-            }
-        }),
-    };
-    is_valid
+fn check_diff_vec(diff_vec: &[i32]) -> i32 {
+    let mut invalid_index = -1;
+    // Check for ascending
+    diff_vec.iter().enumerate().for_each(|(i, val)| {
+        if !(1..=3).contains(val) {
+            invalid_index = i as i32;
+        }
+    });
+
+    if invalid_index == -1 {
+        return invalid_index;
+    }
+
+    invalid_index = -1;
+    // Check for descending
+    diff_vec.iter().enumerate().for_each(|(i, val)| {
+        if !(1..=3).contains(&-val) {
+            invalid_index = i as i32;
+        }
+    });
+
+    invalid_index
+}
+
+fn calculate_diff_vec(t: &[i32], ignore_index: i32) -> Vec<i32> {
+    let mut ret: Vec<i32> = vec![];
+    let mut start_index = 1_usize;
+    let mut prev = t[0];
+
+    if ignore_index == 0 {
+        start_index = 2;
+        prev = t[1]
+    }
+
+    for (i, v) in t.iter().enumerate().skip(start_index) {
+        if i == ignore_index as usize {
+            continue;
+        }
+
+        let current: i32 = *v;
+        let diff = current - prev;
+        prev = current;
+        ret.push(diff);
+    }
+
+    ret
 }
 
 pub fn run(data: &str) {
@@ -20,29 +51,22 @@ pub fn run(data: &str) {
 
     let mut safe_reports = 0;
     for line in lines {
-        let t: Vec<&str> = line.split(" ").collect();
-        let mut diff_vec = Vec::new();
-        let mut ascending = true;
-        if t[1].parse::<i32>().unwrap() - t[0].parse::<i32>().unwrap() < 0 {
-            ascending = false
-        }
+        let t: Vec<i32> = line.split(" ").map(|v| v.parse::<i32>().unwrap()).collect();
+        let diff_vec = calculate_diff_vec(&t, -1);
+        if check_diff_vec(&diff_vec) == -1 {
+            safe_reports += 1;
+            continue;
+        };
 
-        let mut prev: i32 = t[0].parse().unwrap();
-        let mut is_safe = true;
-        let mut last_stand = true;
+        // OPTIMIZE: currently checking by removing every element once
+        let is_safe = t
+            .iter()
+            .enumerate()
+            .map(|(index, _)| check_diff_vec(&calculate_diff_vec(&t, index as i32)) == -1)
+            .reduce(|acc, e| acc | e)
+            .unwrap();
 
-        (1..t.len()).for_each(|i| {
-            let current: i32 = t[i].parse().unwrap();
-            let diff = current - prev;
-            diff_vec.push(diff);
-        });
-
-        // check for ascending
-        let state = check_diff_vec(&diff_vec, true);
-        // for i in 0..diff_vec.len() {
-        //     let state = check_diff_vec(&diff_vec, true);
-        // }
-        if state {
+        if is_safe {
             safe_reports += 1;
         }
     }

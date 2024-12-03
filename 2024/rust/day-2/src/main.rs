@@ -17,6 +17,6 @@ fn main() {
     // day_2_1::run(_TEST_DATA);
     // day_2_1::run(&contents);
 
-    day_2_2::run(_TEST_DATA);
-    // day_2_2::run(&contents);
+    // day_2_2::run(_TEST_DATA);
+    day_2_2::run(&contents);
 }
